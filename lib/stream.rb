@@ -24,6 +24,15 @@ class Stream
     )
   end
 
+  def self.emits(enumerable)
+    return EOF.new unless enumerable.any?
+
+    Stream.new(
+      lambda { enumerable.first },
+      lambda { Stream.emits(enumerable.drop(1)) }
+    )
+  end
+
   def initialize(head_func, tail_func)
     @head_func = head_func
     @tail_func = tail_func

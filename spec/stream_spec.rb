@@ -10,6 +10,47 @@ RSpec.describe Stream do
     end
   end
 
+  describe "#emits" do
+    subject(:stream) { described_class.emits(enumerable) }
+
+    context "when the enumerable is empty" do
+      let(:enumerable) { [] }
+
+      it "returns an empty stream" do
+        expect(stream.empty?).to eq(true)
+      end
+    end
+
+    context "when the enumerable has values" do
+      let(:enumerable) { [1, 2, 3] }
+
+      it "returns a stream emitting those values" do
+        expect(stream.head).to eq(1)
+        expect(stream.tail.head).to eq(2)
+        expect(stream.tail.tail.head).to eq(3)
+        expect(stream.tail.tail.tail.empty?).to eq(true)
+      end
+    end
+
+    context "when the enumerable has many values" do
+      let(:enumerable) { 1..100000 }
+
+      it "wraps the enumerable and does not overflow the stack" do
+        pointer = stream
+        expected_value = 1
+
+        until pointer.empty?
+          expect(pointer.head).to eq(expected_value)
+
+          pointer = pointer.tail
+          expected_value += 1
+        end
+
+        expect(expected_value).to eq(100001)
+      end
+    end
+  end
+
   describe "#head" do
     subject(:stream) { described_class.new(head_func, nil) }
 
@@ -57,11 +98,12 @@ RSpec.describe Stream do
   end
 
   describe "#empty?" do
-    subject(:stream) { described_class.emit(1) }
+    subject(:stream) { described_class.emits([1, 2]) }
 
     it "returns true when the stream runs out of values" do
       expect(stream.empty?).to eq(false)
-      expect(stream.tail.empty?).to eq(true)
+      expect(stream.tail.empty?).to eq(false)
+      expect(stream.tail.tail.empty?).to eq(true)
     end
   end
 
