@@ -122,6 +122,16 @@ RSpec.describe Stream do
     end
   end
 
+  describe "#to_a" do
+    subject(:array) { stream.to_a }
+
+    let(:stream) { Stream.emits([1, 2, 3]) }
+
+    it "converts the stream to an array" do
+      expect(array).to eq([1, 2, 3])
+    end
+  end
+
   describe "#flat_map" do
     subject(:transformed_stream) { stream.flat_map { |x| x * 2 } }
 

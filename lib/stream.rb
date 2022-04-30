@@ -8,6 +8,10 @@ class Stream
       other_stream
     end
 
+    def to_a
+      []
+    end
+
     def method_missing(*)
       self
     end
@@ -57,6 +61,17 @@ class Stream
         tail + other_stream
       end
     )
+  end
+
+  def to_a
+    [].tap do |arr|
+      pointer = self
+
+      until pointer.empty?
+        arr << pointer.head
+        pointer = pointer.tail
+      end
+    end
   end
 
   def flat_map(&block)
