@@ -93,4 +93,8 @@ class Stream
       )
     end
   end
+
+  def map(&block)
+    Stream.emit(self).flat_map(&block)
+  end
 end

@@ -213,4 +213,22 @@ RSpec.describe Stream do
       end
     end
   end
+
+  describe "#map" do
+    subject(:transformed_stream) { stream.flat_map { |x| x - 1 } }
+
+    let(:stream) { Stream.emits([1, 2]) }
+
+    it "returns a stream with the function applied" do
+      expect(transformed_stream.to_a).to eq([0, 1])
+    end
+
+    context "with an empty stream" do
+      let(:stream) { Stream.empty }
+
+      it "returns an empty stream" do
+        expect(transformed_stream.to_a).to eq([])
+      end
+    end
+  end
 end
