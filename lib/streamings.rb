@@ -1,6 +1,5 @@
 require "streamings/version"
+require "stream"
 
 module Streamings
-  class Error < StandardError; end
-  # Your code goes here...
 end
