@@ -121,4 +121,44 @@ RSpec.describe Stream do
       expect(stream.tail.tail.tail.empty?).to eq(true)
     end
   end
+
+  describe "#flat_map" do
+    subject(:transformed_stream) { stream.flat_map { |x| x * 2 } }
+
+    context "with an already flat stream" do
+      let(:stream) { Stream.emits([1, 2]) }
+
+      it "returns a flat stream with the function applied" do
+        expect(transformed_stream.head).to eq(2)
+        expect(transformed_stream.tail.head).to eq(4)
+        expect(transformed_stream.tail.tail.empty?).to eq(true)
+      end
+    end
+
+    context "with nested streams" do
+      let(:stream) { Stream.emits([Stream.emits([1, 2]), Stream.emits([3, 4]), 5]) }
+
+      it "returns a flat stream with the function applied" do
+        expect(transformed_stream.head).to eq(2)
+        expect(transformed_stream.tail.head).to eq(4)
+        expect(transformed_stream.tail.tail.head).to eq(6)
+        expect(transformed_stream.tail.tail.tail.head).to eq(8)
+        expect(transformed_stream.tail.tail.tail.tail.head).to eq(10)
+        expect(transformed_stream.tail.tail.tail.tail.tail.empty?).to eq(true)
+      end
+
+      context "when the first element is not a stream" do
+        let(:stream) { Stream.emits([1, Stream.emits([2, 3]), Stream.emit(4), 5]) }
+
+        it "returns a flat stream with the function applied" do
+          expect(transformed_stream.head).to eq(2)
+          expect(transformed_stream.tail.head).to eq(4)
+          expect(transformed_stream.tail.tail.head).to eq(6)
+          expect(transformed_stream.tail.tail.tail.head).to eq(8)
+          expect(transformed_stream.tail.tail.tail.tail.head).to eq(10)
+          expect(transformed_stream.tail.tail.tail.tail.tail.empty?).to eq(true)
+        end
+      end
+    end
+  end
 end

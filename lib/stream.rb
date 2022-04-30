@@ -39,11 +39,11 @@ class Stream
   end
 
   def head
-    @head_func.call
+    @head ||= @head_func.call
   end
 
   def tail
-    @tail_func.call
+    @tail ||= @tail_func.call
   end
 
   def empty?
@@ -54,8 +54,22 @@ class Stream
     Stream.new(
       @head_func,
       lambda do
-        @tail_func.call + other_stream
+        tail + other_stream
       end
     )
+  end
+
+  def flat_map(&block)
+    if head.is_a?(Stream)
+      Stream.new(
+        lambda { block.call(head.head) },
+        lambda { head.tail.flat_map(&block) + tail.flat_map(&block) }
+      )
+    else
+      Stream.new(
+        lambda { block.call(head) },
+        lambda { tail.flat_map(&block) }
+      )
+    end
   end
 end
