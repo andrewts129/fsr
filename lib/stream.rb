@@ -37,6 +37,10 @@ class Stream
     )
   end
 
+  def self.empty
+    Stream.emit(nil).tail
+  end
+
   def initialize(head_func, tail_func)
     @head_func = head_func
     @tail_func = tail_func

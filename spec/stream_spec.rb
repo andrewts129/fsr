@@ -116,15 +116,15 @@ RSpec.describe Stream do
     end
 
     context "when adding something to an empty stream" do
-      let(:stream_1) { described_class.emit(1).tail }
+      let(:stream_1) { Stream.empty }
 
       it "returns the streams concatenated" do
         expect(stream.to_a).to eq([2, 3])
       end
     end
 
-    context "when adding something to an empty stream" do
-      let(:stream_2) { described_class.emit(1).tail }
+    context "when adding an empty stream to something" do
+      let(:stream_2) { Stream.empty }
 
       it "returns the streams concatenated" do
         expect(stream.to_a).to eq([1, 3])
@@ -132,9 +132,9 @@ RSpec.describe Stream do
     end
 
     context "when adding empty streams together" do
-      let(:stream_1) { described_class.emit(1).tail }
-      let(:stream_2) { described_class.emit(1).tail }
-      let(:stream_3) { described_class.emit(1).tail }
+      let(:stream_1) { Stream.empty }
+      let(:stream_2) { Stream.empty }
+      let(:stream_3) { Stream.empty }
 
       it "returns an empty stream" do
         expect(stream.to_a).to eq([])
@@ -179,7 +179,7 @@ RSpec.describe Stream do
       end
 
       context "when the stream wraps an empty stream" do
-        let(:stream) { Stream.emit(Stream.emit(1).tail) }
+        let(:stream) { Stream.emit(Stream.empty) }
 
         it "returns an empty stream" do
           expect(transformed_stream.to_a).to eq([])
@@ -206,7 +206,7 @@ RSpec.describe Stream do
     end
 
     context "with an empty stream" do
-      let(:stream) { Stream.emit(nil).tail }
+      let(:stream) { Stream.empty }
 
       it "does nothing" do
         expect(transformed_stream).to eq(stream)
