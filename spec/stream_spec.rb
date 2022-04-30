@@ -114,6 +114,32 @@ RSpec.describe Stream do
     it "returns the streams concatenated" do
       expect(stream.to_a).to eq([1, 2, 3])
     end
+
+    context "when adding something to an empty stream" do
+      let(:stream_1) { described_class.emit(1).tail }
+
+      it "returns the streams concatenated" do
+        expect(stream.to_a).to eq([2, 3])
+      end
+    end
+
+    context "when adding something to an empty stream" do
+      let(:stream_2) { described_class.emit(1).tail }
+
+      it "returns the streams concatenated" do
+        expect(stream.to_a).to eq([1, 3])
+      end
+    end
+
+    context "when adding empty streams together" do
+      let(:stream_1) { described_class.emit(1).tail }
+      let(:stream_2) { described_class.emit(1).tail }
+      let(:stream_3) { described_class.emit(1).tail }
+
+      it "returns an empty stream" do
+        expect(stream.to_a).to eq([])
+      end
+    end
   end
 
   describe "#to_a" do
@@ -137,11 +163,27 @@ RSpec.describe Stream do
       end
     end
 
-    context "with nested streams" do
-      let(:stream) { Stream.emits([Stream.emits([1, 2]), Stream.emits([3, 4]), 5]) }
+    context "with singly nested streams" do
+      let(:stream) { Stream.emits([1, Stream.emits([2]), Stream.emits([3, 4]), 5]) }
 
       it "returns a flat stream with the function applied" do
         expect(transformed_stream.to_a).to eq([2, 4, 6, 8, 10])
+      end
+
+      context "when the stream wraps another" do
+        let(:stream) { Stream.emit(Stream.emits([1, 2, 3])) }
+
+        it "returns the nested stream with the function applied" do
+          expect(transformed_stream.to_a).to eq([2, 4, 6])
+        end
+      end
+
+      context "when the stream wraps an empty stream" do
+        let(:stream) { Stream.emit(Stream.emit(1).tail) }
+
+        it "returns an empty stream" do
+          expect(transformed_stream.to_a).to eq([])
+        end
       end
 
       context "when the first element is not a stream" do
@@ -150,6 +192,24 @@ RSpec.describe Stream do
         it "returns a flat stream with the function applied" do
           expect(transformed_stream.to_a).to eq([2, 4, 6, 8, 10])
         end
+      end
+    end
+
+    context "with doubly nested streams" do
+      subject(:transformed_stream) { stream.flat_map(&:empty?) }
+
+      let(:stream) { Stream.emit(Stream.emits([Stream.emits([Stream.emit(1), Stream.emit(2)]), Stream.emit(3)])) }
+
+      it "only flattens the top level" do
+        expect(transformed_stream.to_a).to eq([false, false])
+      end
+    end
+
+    context "with an empty stream" do
+      let(:stream) { Stream.emit(nil).tail }
+
+      it "does nothing" do
+        expect(transformed_stream).to eq(stream)
       end
     end
   end

@@ -55,11 +55,11 @@ class Stream
   end
 
   def +(other_stream)
+    return other_stream if empty?
+
     Stream.new(
       @head_func,
-      lambda do
-        tail + other_stream
-      end
+      lambda { tail + other_stream }
     )
   end
 
@@ -75,10 +75,12 @@ class Stream
   end
 
   def flat_map(&block)
+    return self if empty?
+
     if head.is_a?(Stream)
       Stream.new(
         lambda { block.call(head.head) },
-        lambda { head.tail.flat_map(&block) + tail.flat_map(&block) }
+        lambda { Stream.emit(head.tail).flat_map(&block) + tail.flat_map(&block) }
       )
     else
       Stream.new(
