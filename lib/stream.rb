@@ -33,7 +33,7 @@ class Stream
 
     Stream.new(
       lambda { enumerable.first },
-      lambda { Stream.emits(enumerable.drop(1)) }
+      lambda { Stream.emits(_tail_for_enumerable(enumerable)) }
     )
   end
 
@@ -96,5 +96,21 @@ class Stream
 
   def map(&block)
     Stream.emit(self).flat_map(&block)
+  end
+
+  private
+
+  def self._tail_for_enumerable(enumerable)
+    if enumerable.is_a?(Range)
+      new_start = enumerable.first.succ
+
+      if enumerable.exclude_end?
+        new_start...enumerable.end
+      else
+        new_start..enumerable.end
+      end
+    else
+      enumerable.drop(1)
+    end
   end
 end
