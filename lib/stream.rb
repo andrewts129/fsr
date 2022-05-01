@@ -69,11 +69,8 @@ class Stream
 
   def to_a
     [].tap do |arr|
-      pointer = self
-
-      until pointer.empty?
-        arr << pointer.head
-        pointer = pointer.tail
+      each do |element|
+        arr << element
       end
     end
   end
@@ -96,6 +93,15 @@ class Stream
 
   def map(&block)
     Stream.emit(self).flat_map(&block)
+  end
+
+  def each(&block)
+    pointer = self
+
+    until pointer.empty?
+      block.call(pointer.head)
+      pointer = pointer.tail
+    end
   end
 
   private

@@ -231,4 +231,32 @@ RSpec.describe Stream do
       end
     end
   end
+
+  describe "#each" do
+    context "on a non empty stream" do
+      subject(:stream) { Stream.emits([1, 2, 3]) }
+
+      it "iterates over each element in order" do
+        seen = []
+
+        stream.each do |x|
+          seen << x
+        end
+
+        expect(seen).to eq([1, 2, 3])
+      end
+    end
+
+    context "over an empty list" do
+      subject(:stream) { Stream.empty }
+
+      it "does not execute the block" do
+        expect do
+          stream.each do |x|
+            raise StandardError(x)
+          end
+        end.not_to raise_error
+      end
+    end
+  end
 end
