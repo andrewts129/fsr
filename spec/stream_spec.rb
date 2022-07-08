@@ -309,4 +309,62 @@ RSpec.describe Stream do
       end
     end
   end
+
+  describe("#take") do
+    subject(:taken_stream) { stream.take(n) }
+
+    context "when the stream is empty" do
+      let(:stream) { Stream.empty }
+      let(:n) { 5 }
+
+      it "returns an empty stream" do
+        expect(taken_stream.empty?).to eq(true)
+      end
+    end
+
+    context "when the stream is non-empty" do
+      let(:stream) { Stream.emits([1, 2, 3, 4, 5]) }
+
+      context "when n is less than the length of the stream" do
+        let(:n) { 3 }
+  
+        it "returns the first n elements of the stream" do
+          expect(taken_stream.to_a).to eq([1, 2, 3])
+        end
+      end
+  
+      context "when n is equal to the length of the stream" do
+        let(:n) { 5 }
+  
+        it "returns the entire stream" do
+          expect(taken_stream.to_a).to eq([1, 2, 3, 4, 5])
+        end
+      end
+  
+      context "when n is greater than the length of the stream" do
+        let(:n) { 5 }
+  
+        it "returns the entire stream" do
+          expect(taken_stream.to_a).to eq([1, 2, 3, 4, 5])
+        end
+      end
+
+      context "when n is zero" do
+        let(:n) { 0 }
+  
+        it "returns an empty stream" do
+          expect(taken_stream.empty?).to eq(true)
+        end
+      end
+    end
+
+    context "when given a negative n" do
+      let(:stream) { Stream.emit(1) }
+      let(:n) { -1 }
+
+      it "raises an ArgumentError" do
+        expect { taken_stream }.to raise_error(ArgumentError)
+      end
+    end
+  end
 end

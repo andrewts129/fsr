@@ -107,6 +107,17 @@ class Stream
     end
   end
 
+  def take(n)
+    raise ArgumentError unless n >= 0
+
+    return EOF.new if empty? || n == 0
+
+    Stream.new(
+      @head_func,
+      lambda { tail.take(n - 1) }
+    )
+  end
+
   private
 
   def self._tail_for_enumerable(enumerable)
