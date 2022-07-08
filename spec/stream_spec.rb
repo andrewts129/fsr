@@ -1,12 +1,62 @@
 RSpec.describe Stream do
   describe "#emit" do
-    subject(:stream) { described_class.emit(value) }
+    context "when given an argument" do
+      subject(:stream) { described_class.emit(value) }
 
-    let(:value) { "hello" }
+      let(:value) { "hello" }
+  
+      it "produces a stream with a single value" do
+        expect(stream.to_a).to eq([value])
+      end
+    end
 
-    it "produces a stream with a single value" do
-      expect(stream.head).to eq(value)
-      expect(stream.tail.empty?).to eq(true)
+    context "when given a block" do
+      subject(:stream) do
+        described_class.emit do
+          hello = "hello"
+          world = "world"
+
+          "#{hello} #{world}"
+        end
+      end
+
+      it "produces a stream with a single value" do
+        expect(stream.to_a).to eq(["hello world"])
+      end
+    end
+
+    context "when given invalid input" do
+      context "too many args" do
+        subject(:stream) { described_class.emit(1, 2) }
+
+        it "raises an ArgumentError" do
+          expect { stream }.to raise_error(ArgumentError)
+        end
+      end
+
+      context "no args" do
+        subject(:stream) { described_class.emit }
+
+        it "raises an ArgumentError" do
+          expect { stream }.to raise_error(ArgumentError)
+        end
+      end
+
+      context "an arg and a block" do
+        subject(:stream) { described_class.emit(1) { 2 } }
+
+        it "raises an ArgumentError" do
+          expect { stream }.to raise_error(ArgumentError)
+        end
+      end
+
+      context "multiple args and a block" do
+        subject(:stream) { described_class.emit(1, 2) { 3 } }
+
+        it "raises an ArgumentError" do
+          expect { stream }.to raise_error(ArgumentError)
+        end
+      end
     end
   end
 
