@@ -318,7 +318,7 @@ RSpec.describe Stream do
     end
   end
 
-  describe("#take") do
+  describe "#take" do
     subject(:taken_stream) { stream.take(n) }
 
     context "when the stream is empty" do
@@ -372,6 +372,26 @@ RSpec.describe Stream do
 
       it "raises an ArgumentError" do
         expect { taken_stream }.to raise_error(ArgumentError)
+      end
+    end
+  end
+
+  describe "#repeat" do
+    subject(:repetitive_stream) { stream.repeat }
+
+    context "when the stream is empty" do
+      subject(:stream) { Stream.empty }
+
+      it "returns another empty stream" do
+        expect(repetitive_stream.empty?).to eq(true)
+      end
+    end
+
+    context "when the stream is not empty" do
+      subject(:stream) { Stream.emits([1, 2]) }
+
+      it "returns an infinitely repeating version of it" do
+        expect(repetitive_stream.take(9).to_a).to eq([1, 2, 1, 2, 1, 2, 1, 2, 1])
       end
     end
   end

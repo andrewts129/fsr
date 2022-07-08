@@ -118,6 +118,13 @@ class Stream
     )
   end
 
+  def repeat
+    Stream.new(
+      @head_func,
+      lambda { tail + self.repeat }
+    )
+  end
+
   private
 
   def self._tail_for_enumerable(enumerable)
