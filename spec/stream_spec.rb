@@ -1,5 +1,5 @@
 RSpec.describe Stream do
-  describe "#emit" do
+  describe ".emit" do
     context "when given an argument" do
       subject(:stream) { described_class.emit(value) }
 
@@ -60,7 +60,7 @@ RSpec.describe Stream do
     end
   end
 
-  describe "#emits" do
+  describe ".emits" do
     subject(:stream) { described_class.emits(enumerable) }
 
     context "when the enumerable is empty" do
@@ -95,6 +95,14 @@ RSpec.describe Stream do
 
         expect(expected_value).to eq(100001)
       end
+    end
+  end
+
+  describe ".empty" do
+    subject(:stream) { described_class.empty }
+
+    it "returns an empty stream" do
+      expect(stream.empty?).to eq(true)
     end
   end
 
