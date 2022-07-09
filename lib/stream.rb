@@ -22,13 +22,21 @@ class Stream
   end
 
   def self.emit(*args, &block)
-    raise ArgumentError if !args.empty? && block_given?
-    raise ArgumentError if args.size != 1 && !block_given?
+    if block_given?
+      raise ArgumentError unless args.empty?
 
-    Stream.new(
-      block_given? ? block : lambda { args[0] },
-      lambda { EOF.new }
-    )
+      Stream.new(
+        block,
+        lambda { EOF.new }
+      )
+    else
+      raise ArgumentError unless args.size == 1
+
+      Stream.new(
+        lambda { args[0] },
+        lambda { EOF.new }
+      )  
+    end
   end
 
   def self.emits(enumerable)
