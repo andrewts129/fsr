@@ -106,6 +106,10 @@ class Stream
     Stream.emit(self).flat_map(&block)
   end
 
+  def flatten
+    flat_map(&:itself)
+  end
+
   def each(&block)
     pointer = self
 

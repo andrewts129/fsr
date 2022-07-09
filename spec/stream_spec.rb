@@ -290,6 +290,44 @@ RSpec.describe Stream do
     end
   end
 
+  describe "#flatten" do
+    subject(:flattened_stream) { stream.flatten }
+
+    context "with an empty stream" do
+      let(:stream) { Stream.empty }
+
+      it "returns another empty stream" do
+        expect(flattened_stream.empty?).to eq(true)
+      end
+    end
+
+    context "with a stream that is already flat" do
+      let(:stream) { Stream.emits([1, 2, 3]) }
+
+      it "returns the same stream" do
+        expect(flattened_stream.to_a).to eq([1, 2, 3])
+      end
+    end
+
+    context "with a stream that is nested one layer deep" do
+      let(:stream) { Stream.emits([Stream.emits([1, 2]), 3, Stream.emit(4)]) }
+
+      it "returns the flattened stream" do
+        expect(flattened_stream.to_a).to eq([1, 2, 3, 4])
+      end
+    end
+
+    context "with a stream that is nested multiple layers deep" do
+      let(:stream) { Stream.emits([Stream.emits([1, Stream.emit(2)]), 3, Stream.emit(4)]) }
+
+      it "returns the stream flattened one level" do
+        expect(flattened_stream.head).to eq(1)
+        expect(flattened_stream.tail.head.to_a).to eq([2])
+        expect(flattened_stream.tail.tail.to_a).to eq([3, 4])
+      end
+    end
+  end
+
   describe "#each" do
     context "on a non empty stream" do
       subject(:stream) { Stream.emits([1, 2, 3]) }
