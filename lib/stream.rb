@@ -130,6 +130,15 @@ class Stream
     )
   end
 
+  def drop(n)
+    raise ArgumentError unless n >= 0
+
+    return Stream.empty if empty?
+    return self if n == 0
+
+    tail.drop(n - 1)
+  end
+
   def repeat
     Stream.new(
       @head_func,

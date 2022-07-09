@@ -414,6 +414,64 @@ RSpec.describe Stream do
     end
   end
 
+  describe "#drop" do
+    subject(:cut_stream) { stream.drop(n) }
+
+    context "when the stream is empty" do
+      let(:stream) { Stream.empty }
+      let(:n) { 5 }
+
+      it "returns an empty stream" do
+        expect(cut_stream.empty?).to eq(true)
+      end
+    end
+
+    context "when the stream is non-empty" do
+      let(:stream) { Stream.emits([1, 2, 3, 4, 5]) }
+
+      context "when n is less than the length of the stream" do
+        let(:n) { 3 }
+  
+        it "returns all but the first n elements of the stream" do
+          expect(cut_stream.to_a).to eq([4, 5])
+        end
+      end
+  
+      context "when n is equal to the length of the stream" do
+        let(:n) { 5 }
+  
+        it "returns an empty stream" do
+          expect(cut_stream.empty?).to eq(true)
+        end
+      end
+  
+      context "when n is greater than the length of the stream" do
+        let(:n) { 5 }
+  
+        it "returns an empty stream" do
+          expect(cut_stream.empty?).to eq(true)
+        end
+      end
+
+      context "when n is zero" do
+        let(:n) { 0 }
+  
+        it "returns the same stream" do
+          expect(cut_stream.to_a).to eq([1, 2, 3, 4, 5])
+        end
+      end
+    end
+
+    context "when given a negative n" do
+      let(:stream) { Stream.emit(1) }
+      let(:n) { -1 }
+
+      it "raises an ArgumentError" do
+        expect { cut_stream }.to raise_error(ArgumentError)
+      end
+    end
+  end
+
   describe "#repeat" do
     subject(:repetitive_stream) { stream.repeat }
 
