@@ -92,7 +92,7 @@ class Stream
     if head.is_a?(Stream)
       Stream.new(
         lambda { block.call(head.head) },
-        lambda { Stream.emit(head.tail).flat_map(&block) + tail.flat_map(&block) }
+        lambda { head.tail.map(&block) + tail.flat_map(&block) }
       )
     else
       Stream.new(
