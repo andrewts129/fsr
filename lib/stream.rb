@@ -27,20 +27,20 @@ class Stream
 
       Stream.new(
         block,
-        lambda { EOF.new }
+        lambda { empty }
       )
     else
       raise ArgumentError unless args.size == 1
 
       Stream.new(
         lambda { args[0] },
-        lambda { EOF.new }
+        lambda { empty }
       )  
     end
   end
 
   def self.emits(enumerable)
-    return EOF.new unless enumerable.any?
+    return empty unless enumerable.any?
 
     Stream.new(
       lambda { enumerable.first },
@@ -49,7 +49,7 @@ class Stream
   end
 
   def self.empty
-    Stream.emit(nil).tail
+    EOF.new
   end
 
   def initialize(head_func, tail_func)
@@ -118,7 +118,7 @@ class Stream
   def take(n)
     raise ArgumentError unless n >= 0
 
-    return EOF.new if empty? || n == 0
+    return Stream.empty if empty? || n == 0
 
     Stream.new(
       @head_func,
