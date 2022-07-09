@@ -133,6 +133,17 @@ class Stream
     )
   end
 
+  def filter(&block)
+    if block.call(head)
+      Stream.new(
+        @head_func,
+        lambda { tail.filter(&block) }
+      )
+    else
+      tail.filter(&block)
+    end
+  end
+
   private
 
   def self._tail_for_enumerable(enumerable)

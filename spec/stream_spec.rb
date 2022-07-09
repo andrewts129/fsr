@@ -395,4 +395,34 @@ RSpec.describe Stream do
       end
     end
   end
+
+  describe "#filter" do
+    subject(:filtered_stream) { stream.filter { |x| x % 2 == 0 } }
+
+    context "when the stream is empty" do
+      let(:stream) { Stream.empty }
+
+      it "returns another empty stream" do
+        expect(filtered_stream.empty?).to eq(true)
+      end
+    end
+
+    context "when the stream is not empty" do
+      context "when the first element does not meet the condition" do
+        let(:stream) { Stream.emits([1, 2, 3, 4, 5, 6, 7]) }
+
+        it "filters out all the elements that does not meet the condition" do
+          expect(filtered_stream.to_a).to eq([2, 4, 6])
+        end
+      end
+
+      context "when the first element meets the condition" do
+        let(:stream) { Stream.emits([2, 3, 4, 5, 6, 7]) }
+
+        it "filters out all the elements that does not meet the condition" do
+          expect(filtered_stream.to_a).to eq([2, 4, 6])
+        end
+      end
+    end
+  end
 end
