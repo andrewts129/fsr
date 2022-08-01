@@ -103,7 +103,10 @@ class Stream
   end
 
   def map(&block)
-    Stream.emit(self).flat_map(&block)
+    Stream.new(
+      lambda { block.call(head) },
+      lambda { tail.map(&block) }
+    )
   end
 
   def flatten
