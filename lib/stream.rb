@@ -25,26 +25,35 @@ class Stream
     if block_given?
       raise ArgumentError unless args.empty?
 
-      Stream.new(
-        block,
-        lambda { empty }
-      )
+      transform_func = ->(at_head) { at_head ? block.call : empty }
     else
       raise ArgumentError unless args.size == 1
 
-      Stream.new(
-        lambda { args[0] },
-        lambda { empty }
-      )  
+      transform_func = ->(at_head) { at_head ? args[0] : empty }
     end
+
+    Stream.new(
+      FSR::Emitter.new(true, transform_func) { false }
+    )
   end
 
   def self.emits(enumerable)
-    return empty unless enumerable.any?
+    enumerator = enumerable.to_enum
+
+    begin
+      initial_value = enumerator.next
+    rescue StopIteration
+      return empty
+    end
 
     Stream.new(
-      lambda { enumerable.first },
-      lambda { Stream.emits(_tail_for_enumerable(enumerable)) }
+      FSR::Emitter.new(initial_value) do
+        begin
+          enumerator.next
+        rescue StopIteration
+          empty
+        end
+      end
     )
   end
 
@@ -52,17 +61,40 @@ class Stream
     EOF.new
   end
 
-  def initialize(head_func, tail_func)
-    @head_func = head_func
-    @tail_func = tail_func
+  def self.concat(first_stream, second_stream)
+    first_stream_pointer = first_stream
+    second_stream_pointer = second_stream
+
+    emitter_wrapping_both = FSR::Emitter.new(
+      first_stream_pointer.empty?,
+       ->(has_exhausted_first) { has_exhausted_first ? second_stream_pointer.head : first_stream_pointer.head }
+    ) do |has_exhausted_first|
+      if has_exhausted_first
+        second_stream_pointer = second_stream_pointer.tail
+
+        true
+      else
+        first_stream_pointer = first_stream_pointer.tail
+
+        first_stream_pointer.empty?
+      end
+    end
+
+    Stream.new(emitter_wrapping_both)
+  end
+
+  # kernel methods
+
+  def initialize(emitter)
+    @emitter = emitter
   end
 
   def head
-    @head ||= @head_func.call
+    @emitter.emit
   end
 
   def tail
-    @tail ||= @tail_func.call
+    Stream.new(@emitter.unfold)
   end
 
   def empty?
@@ -70,13 +102,10 @@ class Stream
   end
 
   def +(other_stream)
-    return other_stream if empty?
-
-    Stream.new(
-      @head_func,
-      lambda { tail + other_stream }
-    )
+    Stream.concat(self, other_stream)
   end
+
+  # enhancement methods
 
   def to_a
     [].tap do |arr|

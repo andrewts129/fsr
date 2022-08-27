@@ -106,8 +106,45 @@ RSpec.describe Stream do
     end
   end
 
+  describe ".concat" do
+    subject(:stream) { described_class.concat(stream_1, stream_2) }
+
+    let(:stream_1) { described_class.emits([1, 2]) }
+    let(:stream_2) { described_class.emits([3, 4, 5]) }
+
+    it "returns the streams concatenated" do
+      expect(stream.to_a).to eq([1, 2, 3, 4, 5])
+    end
+
+    context "when adding something to an empty stream" do
+      let(:stream_1) { Stream.empty }
+
+      it "returns the streams concatenated" do
+        expect(stream.to_a).to eq([3, 4, 5])
+      end
+    end
+
+    context "when adding an empty stream to something" do
+      let(:stream_2) { Stream.empty }
+
+      it "returns the streams concatenated" do
+        expect(stream.to_a).to eq([1, 2])
+      end
+    end
+
+    context "when adding empty streams together" do
+      let(:stream_1) { Stream.empty }
+      let(:stream_2) { Stream.empty }
+      let(:stream_3) { Stream.empty }
+
+      it "returns an empty stream" do
+        expect(stream.to_a).to eq([])
+      end
+    end
+  end
+
   describe "#head" do
-    subject(:stream) { described_class.new(head_func, nil) }
+    subject(:stream) { described_class.new(emitter) }
 
     let(:dummy) do
       Class.new do
@@ -119,36 +156,42 @@ RSpec.describe Stream do
       end.new
     end
 
-    let(:head_func) do
-      lambda { dummy.mutated = true; "hello" }
+    let(:emitter) do
+      FSR::Emitter.new("hello", ->(x) { dummy.mutated = true; "#{x} world" }) { nil }
     end
 
-    it "executes the given func" do
+    it "triggers the given emitter" do
       expect { stream.head }.to change { dummy.mutated }.from(false).to(true)
-      expect(stream.head).to eq("hello")
+      expect(stream.head).to eq("hello world")
     end
   end
 
   describe "#tail" do
-    subject(:stream) { described_class.new(nil, tail_func) }
+    subject(:stream) { described_class.new(emitter) }
 
     let(:dummy) do
       Class.new do
-        attr_accessor :mutated
+        attr_accessor :mutable_buffer
 
         def initialize
-          @mutated = false
+          @mutable_buffer = "foo"
         end
       end.new
     end
 
-    let(:tail_func) do
-      lambda { dummy.mutated = true; "world" }
+    let(:emitter) do
+      FSR::Emitter.new("hello", ->(x) { dummy.mutable_buffer += "boo"; "#{x} world" } ) do |x|
+        dummy.mutable_buffer += "bar"; "hello #{x}"
+      end
     end
 
-    it "executes the given func" do
-      expect { stream.tail }.to change { dummy.mutated }.from(false).to(true)
-      expect(stream.tail).to eq("world")
+    it "returns a new stream, with the second value of the emitter as the head" do
+      tail = nil
+      expect { tail = stream.tail }.to change { dummy.mutable_buffer }.from("foo").to("foobar")
+
+      new_head = nil
+      expect { new_head = tail.head }.to change { dummy.mutable_buffer }.from("foobar").to("foobarboo")
+      expect(new_head).to eq("hello hello world")
     end
   end
 
