@@ -1,12 +1,12 @@
-require_relative 'lib/streamings/version'
+require_relative 'lib/fsr/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "streamings"
-  spec.version       = Streamings::VERSION
+  spec.name          = "fsr"
+  spec.version       = FSR::VERSION
   spec.authors       = ["Andrew Smith"]
   spec.email         = ["andrewts129@gmail.com"]
 
-  spec.summary       = "Library providing lazy, functional streams"
+  spec.summary       = "Lazy, (f)unctional (s)treams for (R)uby"
   spec.homepage      = "https://andrewsmith.io"
   spec.license       = "MIT"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.3.0")

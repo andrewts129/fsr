@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    streamings (0.1.0)
+    fsr (0.1.0)
 
 GEM
   remote: https://rubygems.org/
@@ -26,9 +26,9 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  fsr!
   rake (~> 12.0)
   rspec (~> 3.0)
-  streamings!
 
 BUNDLED WITH
    2.1.2
