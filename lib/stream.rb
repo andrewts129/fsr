@@ -105,6 +105,10 @@ class Stream
     Stream.concat(self, other_stream)
   end
 
+  def map(&block)
+    Stream.new(@emitter.map(&block))
+  end
+
   # enhancement methods
 
   def to_a
@@ -129,13 +133,6 @@ class Stream
         lambda { tail.flat_map(&block) }
       )
     end
-  end
-
-  def map(&block)
-    Stream.new(
-      lambda { block.call(head) },
-      lambda { tail.map(&block) }
-    )
   end
 
   def flatten

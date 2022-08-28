@@ -316,7 +316,7 @@ RSpec.describe Stream do
   end
 
   describe "#map" do
-    subject(:transformed_stream) { stream.flat_map { |x| x - 1 } }
+    subject(:transformed_stream) { stream.map { |x| x - 1 } }
 
     let(:stream) { Stream.emits([1, 2]) }
 
