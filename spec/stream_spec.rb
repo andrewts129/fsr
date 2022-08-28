@@ -96,6 +96,14 @@ RSpec.describe Stream do
         expect(expected_value).to eq(100001)
       end
     end
+
+    context "when given a non-enumerable" do
+      let(:enumerable) { "foo" }
+
+      it "returns a stream with just that value" do
+        expect(stream.to_a).to eq(["foo"])
+      end
+    end
   end
 
   describe ".empty" do

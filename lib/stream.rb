@@ -38,6 +38,8 @@ class Stream
   end
 
   def self.emits(enumerable)
+    return Stream.emit(enumerable) unless enumerable.respond_to?(:each)
+
     enumerator = enumerable.to_enum
 
     begin
