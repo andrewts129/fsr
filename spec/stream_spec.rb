@@ -114,43 +114,6 @@ RSpec.describe Stream do
     end
   end
 
-  describe ".concat" do
-    subject(:stream) { described_class.concat(stream_1, stream_2) }
-
-    let(:stream_1) { described_class.emits([1, 2]) }
-    let(:stream_2) { described_class.emits([3, 4, 5]) }
-
-    it "returns the streams concatenated" do
-      expect(stream.to_a).to eq([1, 2, 3, 4, 5])
-    end
-
-    context "when adding something to an empty stream" do
-      let(:stream_1) { Stream.empty }
-
-      it "returns the streams concatenated" do
-        expect(stream.to_a).to eq([3, 4, 5])
-      end
-    end
-
-    context "when adding an empty stream to something" do
-      let(:stream_2) { Stream.empty }
-
-      it "returns the streams concatenated" do
-        expect(stream.to_a).to eq([1, 2])
-      end
-    end
-
-    context "when adding empty streams together" do
-      let(:stream_1) { Stream.empty }
-      let(:stream_2) { Stream.empty }
-      let(:stream_3) { Stream.empty }
-
-      it "returns an empty stream" do
-        expect(stream.to_a).to eq([])
-      end
-    end
-  end
-
   describe "#head" do
     subject(:stream) { described_class.new(emitter) }
 
@@ -217,18 +180,18 @@ RSpec.describe Stream do
     subject(:stream) { stream_1 + stream_2 + stream_3 }
 
     let(:stream_1) { described_class.emit(1) }
-    let(:stream_2) { described_class.emit(2) }
-    let(:stream_3) { described_class.emit(3) }
+    let(:stream_2) { described_class.emits([2, 3]) }
+    let(:stream_3) { described_class.emit(4) }
 
     it "returns the streams concatenated" do
-      expect(stream.to_a).to eq([1, 2, 3])
+      expect(stream.to_a).to eq([1, 2, 3, 4])
     end
 
     context "when adding something to an empty stream" do
       let(:stream_1) { Stream.empty }
 
       it "returns the streams concatenated" do
-        expect(stream.to_a).to eq([2, 3])
+        expect(stream.to_a).to eq([2, 3, 4])
       end
     end
 
@@ -236,7 +199,7 @@ RSpec.describe Stream do
       let(:stream_2) { Stream.empty }
 
       it "returns the streams concatenated" do
-        expect(stream.to_a).to eq([1, 3])
+        expect(stream.to_a).to eq([1, 4])
       end
     end
 
@@ -247,6 +210,22 @@ RSpec.describe Stream do
 
       it "returns an empty stream" do
         expect(stream.to_a).to eq([])
+      end
+    end
+
+    context "when given an array" do
+      let(:stream_3) { [4, 5] }
+
+      it "returns the streams concatenated" do
+        expect(stream.to_a).to eq([1, 2, 3, 4, 5])
+      end
+    end
+
+    context "when given a range" do
+      let(:stream_3) { (4..5) }
+
+      it "returns the streams concatenated" do
+        expect(stream.to_a).to eq([1, 2, 3, 4, 5])
       end
     end
   end

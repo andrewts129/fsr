@@ -63,28 +63,6 @@ class Stream
     EOF.new
   end
 
-  def self.concat(first_stream, second_stream)
-    first_stream_pointer = first_stream
-    second_stream_pointer = second_stream
-
-    emitter_wrapping_both = FSR::Emitter.new(
-      first_stream_pointer.empty?,
-       ->(has_exhausted_first) { has_exhausted_first ? second_stream_pointer.head : first_stream_pointer.head }
-    ) do |has_exhausted_first|
-      if has_exhausted_first
-        second_stream_pointer = second_stream_pointer.tail
-
-        true
-      else
-        first_stream_pointer = first_stream_pointer.tail
-
-        first_stream_pointer.empty?
-      end
-    end
-
-    Stream.new(emitter_wrapping_both)
-  end
-
   # kernel methods
 
   def initialize(emitter)
@@ -104,7 +82,27 @@ class Stream
   end
 
   def +(other_stream)
-    Stream.concat(self, other_stream)
+    other_stream = Stream.emits(other_stream) if other_stream.is_a?(Enumerable)
+
+    first_stream_pointer = self
+    second_stream_pointer = other_stream
+
+    emitter_wrapping_both = FSR::Emitter.new(
+      first_stream_pointer.empty?,
+       ->(has_exhausted_first) { has_exhausted_first ? second_stream_pointer.head : first_stream_pointer.head }
+    ) do |has_exhausted_first|
+      if has_exhausted_first
+        second_stream_pointer = second_stream_pointer.tail
+
+        true
+      else
+        first_stream_pointer = first_stream_pointer.tail
+
+        first_stream_pointer.empty?
+      end
+    end
+
+    Stream.new(emitter_wrapping_both)
   end
 
   def map(&block)
@@ -185,22 +183,6 @@ class Stream
       )
     else
       tail.filter(&block)
-    end
-  end
-
-  private
-
-  def self._tail_for_enumerable(enumerable)
-    if enumerable.is_a?(Range)
-      new_start = enumerable.first.succ
-
-      if enumerable.exclude_end?
-        new_start...enumerable.end
-      else
-        new_start..enumerable.end
-      end
-    else
-      enumerable.drop(1)
     end
   end
 end
