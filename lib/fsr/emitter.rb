@@ -1,5 +1,5 @@
 module FSR
-class Emitter
+  class Emitter
     IDENTITY_FUNC = ->(x) { x }
 
     def initialize(initial = nil, emitter_func = IDENTITY_FUNC, &unfold_func)
@@ -16,6 +16,10 @@ class Emitter
 
     def unfold
       Emitter.new(@unfold_func.call(@initial), @emitter_func, &@unfold_func)
+    end
+
+    def map(&emitter_func)
+      Emitter.new(@initial, ->(x) { emitter_func.call(@emitter_func.call(x)) }, &@unfold_func)
     end
   end
 end

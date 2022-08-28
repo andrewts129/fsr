@@ -27,4 +27,14 @@ RSpec.describe FSR::Emitter do
       expect(new_emitter.emit).to eq("---43---")
     end
   end
+
+  describe "#map" do
+    subject(:mapped_emitter) { emitter.map { |x| x * 2 } }
+    
+    let(:emitter) { described_class.new(42, ->(x) { x + 1 }) { nil } }
+
+    it "layers the new function on top of the existing emitter function" do
+      expect(mapped_emitter.emit).to eq(86)
+    end
+  end
 end
